@@ -1,31 +1,39 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
-import { useRouter } from 'next/router';
 
 type ChannelData = {
-  channelName: string;
-  selectedUsers: string[];
+  name: string;
   isPublic: boolean;
+  selectedUsers: string[];
 };
 
-const ChannelEditPage = () => {
-  const [channel, setChannel] = useState<ChannelData | null>(null);
-  const { register, handleSubmit } = useForm<ChannelData>();
-  const router = useRouter();
-  const { channel_id } = router.query;
+const EditChannelPage = () => {
+  const { handleSubmit, register, setValue } = useForm<ChannelData>();
+  const [users, setUsers] = useState<string[]>([]);
+  const channel_id = 'your_channel_id'; // Replace with the actual channel ID
 
   useEffect(() => {
-    if (channel_id) {
-    const channelIdString = Array.isArray(channel_id) ? channel_id[0] : channel_id;
-      fetchChannelData(channelIdString);
-    }
+    fetchUsers();
+    fetchChannelData(channel_id);
   }, [channel_id]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('/api/users');
+      setUsers(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchChannelData = async (channelId: string) => {
     try {
       const response = await axios.get(`/api/channel/${channelId}`);
-      setChannel(response.data);
+      const { name, isPublic, selectedUsers } = response.data;
+      setValue('name', name);
+      setValue('isPublic', isPublic);
+      setValue('selectedUsers', selectedUsers);
     } catch (error) {
       console.log(error);
     }
@@ -34,28 +42,39 @@ const ChannelEditPage = () => {
   const onSubmit = async (data: ChannelData) => {
     try {
       await axios.put(`/api/channel/${channel_id}`, data);
-      // Handle successful update
-      router.push('/channels');
+      // Redirect to the channel page or show a success message
     } catch (error) {
       console.log(error);
     }
   };
 
-  if (!channel) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
-      <h1>Edit Channel</h1>
+      <h1>Edit Channel: {channel_id}</h1>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
-          <label htmlFor="channelName">Channel Name</label>
-          <input type="text" id="channelName" defaultValue={channel.channelName} {...register('channelName')} />
+          <label htmlFor="name">Channel Name</label>
+          <input type="text" id="name" {...register('name')} />
         </div>
 
-        {/* Render the rest of the form fields */}
+        <div>
+          <label htmlFor="isPublic">Is Public?</label>
+          <input type="checkbox" id="isPublic" {...register('isPublic')} />
+        </div>
+
+        {!register('isPublic').value && (
+          <div>
+            <label htmlFor="selectedUsers">Selected Users</label>
+            <select id="selectedUsers" multiple {...register('selectedUsers')}>
+              {users.map((user) => (
+                <option key={user} value={user}>
+                  {user}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <button type="submit">Update Channel</button>
       </form>
@@ -63,4 +82,4 @@ const ChannelEditPage = () => {
   );
 };
 
-export default ChannelEditPage;
+export default EditChannelPage;

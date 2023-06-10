@@ -23,7 +23,7 @@ const ChannelCreatePage = () => {
     // Fetch the list of users from the backend API
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('/api/users');
+        const response = await axios.get('http://localhost:8080/users');
         setUsers(response.data);
       } catch (error) {
         console.log(error);
@@ -55,7 +55,7 @@ const ChannelCreatePage = () => {
       };
 
       // Send the data to the backend API to create the channel
-      const response = await axios.post('/api/channel/create', requestData);
+      const response = await axios.post('http://localhost:8080/users', requestData);
 
       // Handle the response as needed
       console.log(response.data);

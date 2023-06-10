@@ -31,7 +31,7 @@ const MessagePage = () => {
 
   const fetchUserData = async (userId: string) => {
     try {
-      const response = await axios.get(`/api/user/${userId}`);
+      const response = await axios.get(`'http://localhost:8080/users'${userId}`);
       setUser(response.data);
     } catch (error) {
       console.log(error);
@@ -40,7 +40,7 @@ const MessagePage = () => {
 
   const fetchMessages = async (userId: string) => {
     try {
-      const response = await axios.get(`/api/messages/${userId}`);
+      const response = await axios.get(`http://localhost:8080/messages/${userId}`);
       setMessages(response.data);
     } catch (error) {
       console.log(error);
@@ -49,7 +49,7 @@ const MessagePage = () => {
 
   const onSubmit = async (data: MessageData) => {
     try {
-      await axios.post(`/api/messages/${user_id}`, data);
+      await axios.post(`http://localhost:8080/message/${user_id}`, data);
       // Reset the form after successful submission
       reset();
       // Fetch updated messages
